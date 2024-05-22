@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +23,14 @@ public class CourseApiService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    public List<CategorySecondDTO> getSecondCoursesByFirstCourse(int firstCategory) throws JsonProcessingException {
+    @Cacheable(value = "secondCourses", key = "#requestFindDTO.firstCategory")
+    public List<CategorySecondDTO> getSecondCoursesByFirstCourse(RequestFindDTO requestFindDTO) throws JsonProcessingException {
         String url = "https://courses-top.ru/api/top-page/find";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
 
-        RequestFindDTO requestBodyDTO = new RequestFindDTO(firstCategory);
-        String requestBody = objectMapper.writeValueAsString(requestBodyDTO);
+        String requestBody = objectMapper.writeValueAsString(requestFindDTO);
 
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
@@ -38,8 +39,9 @@ public class CourseApiService {
         return objectMapper.readValue(response.getBody(), new TypeReference<List<CategorySecondDTO>>() {});
     }
 
+    @Cacheable(value = "courseByAlias", key = "#alias")
     public CourseResponseDTO getCourseByAlias(String alias) throws Exception {
-        String url = "https://courses-top.ru/api/top-page/byAlias/{}".formatted(alias);
+        String url = String.format("https://courses-top.ru/api/top-page/byAlias/%s", alias);
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
