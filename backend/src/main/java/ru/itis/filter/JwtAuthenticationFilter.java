@@ -37,7 +37,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader(HEADER_NAME);
 
-        if (!StringUtils.hasLength(authHeader) || !StringUtils.startsWithIgnoreCase(authHeader, HEADER_NAME)) {
+        Boolean bool = !StringUtils.hasLength(authHeader);
+        Boolean bool2 = !StringUtils.startsWithIgnoreCase(authHeader, HEADER_NAME);
+
+        if (!StringUtils.hasLength(authHeader) || !StringUtils.startsWithIgnoreCase(authHeader, BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -45,10 +48,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwtToken = authHeader.substring(BEARER_PREFIX.length());
         String userName = jwtService.extractUsername(jwtToken);
 
+        Boolean t = StringUtils.hasLength(userName);
+        SecurityContextHolder securityContextHolder = (SecurityContextHolder) SecurityContextHolder.getContext().getAuthentication();
+
+
         if (StringUtils.hasLength(userName) && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userService.userDetailsService().loadUserByUsername(userName);
 
-            if (jwtService. isTokenValid(jwtToken, userDetails)) {
+            if (jwtService.isTokenValid(jwtToken, userDetails)) {
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

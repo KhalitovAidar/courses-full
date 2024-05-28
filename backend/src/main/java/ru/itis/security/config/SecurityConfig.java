@@ -36,10 +36,10 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    //TODO: Разработать фильтры и указать
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                                                   .requestMatchers(PERMIT_ALL).permitAll()
                                                   .anyRequest().authenticated())
