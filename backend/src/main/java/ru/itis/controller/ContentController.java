@@ -38,7 +38,7 @@ public class ContentController {
     }
 
     @PostMapping("/delete-user")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(@RequestBody DeleteUserDTO dto) {
         userService.deleteByUsername(dto.getUsername());
     }
